@@ -17,7 +17,7 @@ function App() {
   for (var row = 0; row < rownumbers; row++) {
     startgrid[row] = [];
     for (var col = 0; col < colnumbers; col++) {
-      startgrid[row][col] = [0,1];
+      startgrid[row][col] = [0,0];
     }
   }
 
@@ -118,14 +118,6 @@ function App() {
     }
 
   }  
-  
-
-
-
-
-
-
-
 
   const initialDistance = () => {
     const newGrid = [...maingrid]; // clone maingrid
@@ -259,129 +251,107 @@ function App() {
     createWeight();
   }
 
- const DjikstraTry = () => {
-    var pathArray = [];
-    var pathWeights = [];
-    var finished = false;
-    const startNode = [startendpos[0]+'/'+ startendpos[1]];
-    pathArray.push(startNode);
-
-    var sum = 0;
-
-    const startNodeRow = startendpos[0];
-    const startNodeCol = startendpos[1];
-
-    pathWeights.push(maingrid[startNodeRow+1][startNodeCol][1]);
-    pathWeights.push(maingrid[startNodeRow-1][startNodeCol][1]);
-    pathWeights.push(maingrid[startNodeRow][startNodeCol+1][1]);
-    pathWeights.push(maingrid[startNodeRow][startNodeCol-1][1]);
-
-    while(sum < 4){
-        if(maingrid[startNodeRow+1][startNodeCol][1] <= Math.min(...pathWeights)){
-          
-        }
-        sum++;
-    }
-
-    alert(pathWeights)
-    alert(pathArray);
-  }
-
-/*
-  const DjikstraTry2 = () => {
-    //Grid
-    //Source
+  const DijkstraAlgorithm = () => {
     const startRow = startendpos[0];
     const startCol = startendpos[1];
+    const endRow = startendpos[2];
+    const endCol = startendpos[3];
 
-    var visitedVertex = [];
-    var distance = [];
-    //Initial Fill
-    for (var row = 0; row < rownumbers; row++) {
-      visitedVertex[row] = [];
-      distance[row] = [];
-      for (var col = 0; col < colnumbers; col++) {
-        visitedVertex[row][col] = false;
-        distance[row][col] = Infinity;
-      }
-    }
-    distance[startRow][startCol] = 0;
-
-  
-
-    for(var i = 0; i < rownumbers; i++){
-      var u = findMinDistance(distance, visitedVertex);
-      visitedVertex[u] = true;
-
-    }
-
-
-  }*/
-
-  const Djikstra = () => {
-   /* const startRow = startendpos[0];
-    const startCol = startendpos[1];
-
-    var cost = [];
-    var distance = [];
-    var pred = [];
-    var visited = [];
-
-    var mindistance;
-    var nextnode;
-    var mindistance;
+    var newArray = [...maingrid]; //clone maingrid 
 
     for (var row = 0; row < rownumbers; row++) {
-      cost[row] = [];
       for (var col = 0; col < colnumbers; col++) {
-        //newArr[row][col] = '0';
-        if(maingrid[row][col][1] === 1){ //if Start Node then empty it
-          cost[row][col] = maingrid[row][col];
-        }
-        else{
-          cost[row][col] = Infinity;
-        }
+        newArray[row][col][1] = 1;
       }
     }
+    newArray[startRow][startCol][1] = 0;
+
+    var dict = []; // create an empty array
+    //dict.push({value:   0,  position: [startRow,startCol]});
 
 
-    for (var i = 0; i < rownumbers; i++) {
-      distance[i] = cost[startRow][startCol];
-      pred[i] = startRow;
-      visited[i] = 0;
-    }
+    var sumVals = [];
+    var position = [];
 
-    distance[startRow] = 0;
-    visited[startRow] = 1;
-    var count = 1;
+    var dataStack = [];
 
-    while (count < 10 - 1) {
-      mindistance = Infinity;
-  
-      for (var i = 0; i < 10; i++)
-        if (distance[i] < mindistance && !visited[i]) {
-          mindistance = distance[i];
-          nextnode = i;
-        }
-  
-      visited[nextnode] = 1;
-      for (var i = 0; i < 10; i++)
-        if (!visited[i])
-          if (mindistance + cost[nextnode][i] < distance[i]) {
-            distance[i] = mindistance + cost[nextnode][i];
-            pred[i] = nextnode;
-          }
-      count++;
-    }
-  
-    for (var i = 0; i < 10; i++){
-      if (i != startRow) {
-        alert("\nDistance from source to %d: %d", i, distance[i]);
+    var currentPosX = startRow;
+    var currentPosY = startCol;
+
+    var currentMinimum = 0;
+
+    var visitedNodes = [];
+    // add start node as visited
+    visitedNodes.push(startRow + ":" + startCol)
+
+    // 3,15,15,19               -              1,1,1,1
+    // min 3 so pos 3           -              min 1 so pos of 1
+    // surrounding : 10 ,13, 18 -              surround : 1, 1, 1, 1
+    // Add + 3 (prev Value)     -              
+    // new vals : 13, 16, 21    -              new vals : 2,2,2
+    // Replace 3 by new vals    -              2,2,2, 1, 1, 1             
+    // Table Ascending order    -
+    // 13,15,15,16,19,21        -              1, 1, 1, 2, 2, 2 
+
+    var goalreached = false;
+
+    
+    for (var reps = 0; reps < 100; reps++){}
+    
+    while(goalreached === false){
+      dataStack.shift(); // remove first value cuz we need to replace it by these following three !
+      if(visitedNodes.includes(currentPosX + ":" + (currentPosY+1))  === false && isWall(currentPosX, currentPosY+1) == false){
+         dataStack.unshift([newArray[currentPosX][currentPosY+1][1] + currentMinimum, currentPosX, currentPosY+1, '|']);
+         newArray[currentPosX][currentPosY+1][0] = 4;
       }
+      if(visitedNodes.includes((currentPosX+1) + ":" + currentPosY)  === false && isWall(currentPosX+1, currentPosY) == false){
+        dataStack.unshift([newArray[currentPosX+1][currentPosY][1] + currentMinimum, currentPosX+1, currentPosY, '|']);
+        newArray[currentPosX+1][currentPosY][0] = 4;
+      }
+      if(visitedNodes.includes(currentPosX + ":" + (currentPosY-1) ) === false && isWall(currentPosX, currentPosY-1) == false){
+        dataStack.unshift([newArray[currentPosX][currentPosY-1][1] + currentMinimum, currentPosX, currentPosY-1, '|']);
+        newArray[currentPosX][currentPosY-1][0] = 4;
+      }
+      if(visitedNodes.includes((currentPosX-1) + ":" + currentPosY)  === false && isWall(currentPosX-1, currentPosY) == false){
+        dataStack.unshift([newArray[currentPosX-1][currentPosY][1] + currentMinimum, currentPosX-1, currentPosY, '|']);
+        newArray[currentPosX-1][currentPosY][0] = 4;
+      }
+
+
+      // sort dataStack by ascendig order
+      dataStack = dataStack.sort(function(a,b) {return a[0]-b[0]});
+      
+
+      // 0 cuz ascending order so minimum is always in 0
+      var minimumPosX = dataStack[0][1];
+      var minimumPosY = dataStack[0][2];
+      currentPosX = minimumPosX;
+      currentPosY = minimumPosY;
+
+      // update minimum
+      currentMinimum += dataStack[0][0];
+
+     // alert("" + currentPosY + ":" + currentPosY + "");
+      visitedNodes.push(currentPosX + ":" + currentPosY)
+
+      if(currentPosX == endRow && currentPosY == endCol){
+        goalreached = true;
+      }
+
     }
     
-    */
+    updateGrid([...newArray]);
   }
+
+  function isWall(row,col) {
+    if(maingrid[row][col][0] == 1){
+        return true;
+    }
+    else{
+      return false;
+    }
+  }
+
 
   // Create Grid Display with TABLE :
   var grid = [<></>];
@@ -407,7 +377,7 @@ function App() {
 
   return (
     <div className="row" >
-      <Dashboard Grid = {maingrid} clearGrid={clearGrid} updateStartBtn={updateStartBtn} updateEndBtn={updateEndBtn} Dijkstra={Dijkstra} updatethegrid={updatethegrid} checkgrid={checkgrid} />
+      <Dashboard Grid = {maingrid} clearGrid={clearGrid} updateStartBtn={updateStartBtn} updateEndBtn={updateEndBtn} DijkstraAlgorithm={DijkstraAlgorithm} updatethegrid={updatethegrid} checkgrid={checkgrid} />
       <DragDropContext>
         <table className='grid-board '>
             {grid}
