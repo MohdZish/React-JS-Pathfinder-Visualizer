@@ -6,7 +6,7 @@ const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnc
     var weight = maingrid[row][col][1]
 
     
-    //Values : 0:Empty; 1:Wall; 2:Start; 3:Target; 4:CorrectPath; 5:SearchPath
+    //Values : 0:Empty; 1:Wall; 2:Start; 3:Target;  4:SearchPath; 5:FinalPath;
     if(row == startendpos[0] && col == startendpos[1]){ //Check if current cell is the startnode
         updatethegrid(row, col, 2)
         var value = 2
@@ -62,9 +62,8 @@ const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnc
     const startblock = <div className='btn btn-primary'></div>;
 
     return (
-        
-        <div className='gridsquare'   onClick={onchange} style={{ backgroundColor : value === 1 ? '#007BFF' : value === 2 ?  '#34eb6b' : value === 3 ?  '#f74848' : '' }}>
-           {maingrid[row][col][1]}
+        <div className='gridsquare'   onClick={onchange} style={{ backgroundColor : value === 1 ? '#007BFF' : value === 2 ?  '#34eb6b' : value === 3 ?  '#f74848' : value === 4 ?  'yellow' : '' }}>
+         
         </div>
     )
 }
