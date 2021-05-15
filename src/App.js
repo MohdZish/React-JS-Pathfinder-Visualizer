@@ -17,7 +17,7 @@ function App() {
   for (var row = 0; row < rownumbers; row++) {
     startgrid[row] = [];
     for (var col = 0; col < colnumbers; col++) {
-      startgrid[row][col] = [0,0];
+      startgrid[row][col] = [0,0,0]; // first is Type, second: X of previous node; third : Y of previous node
     }
   }
 
@@ -47,7 +47,7 @@ function App() {
     for (var row = 0; row < rownumbers; row++) {
       newArr[row] = [];
       for (var col = 0; col < colnumbers; col++) {
-        newArr[row][col] = [0,0];
+        newArr[row][col] = [0,0,0];
       }
     }
     updateGrid([...newArr])
@@ -111,7 +111,7 @@ function App() {
     var Q = [];
 
     visited.push(startRow + " " + startCol)
-    //alert(visited.includes(startRow + " " + startCol))
+    
     while (!endReached){
 
         endReached = true;
@@ -251,14 +251,20 @@ function App() {
     createWeight();
   }
 
-  const DijkstraAlgorithm = () => {
-    const startRow = startendpos[0];
-    const startCol = startendpos[1];
+
+  // Understanding Dijkstra : 
+  // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode
+  // https://levelup.gitconnected.com/dijkstras-shortest-path-algorithm-in-a-grid-eb505eb3a290
+  // https://stackoverflow.com/questions/56609206/how-do-i-keep-track-of-the-shortest-paths-in-the-dijkstra-algorithm-when-using-a
+  async function DijkstraAlgorithm() {
+    const startRow = startendpos[0]; // row number of start
+    const startCol = startendpos[1]; // col number of start
     const endRow = startendpos[2];
     const endCol = startendpos[3];
 
     var newArray = [...maingrid]; //clone maingrid 
-
+    
+    // Giving value of 1 for all the nodes except start which gets 0
     for (var row = 0; row < rownumbers; row++) {
       for (var col = 0; col < colnumbers; col++) {
         newArray[row][col][1] = 1;
@@ -266,20 +272,20 @@ function App() {
     }
     newArray[startRow][startCol][1] = 0;
 
-    var dict = []; // create an empty array
-    //dict.push({value:   0,  position: [startRow,startCol]});
-
-
-    var sumVals = [];
-    var position = [];
-
+    // IMPORTANT :
+    // dataStack contains : 
+    // minimum distance with each node, 
+    // Position X of this node, 
+    // Position Y of this node, 
+    // Position X of previous node (current node),
+    // Position Y of previous node (current node),
     var dataStack = [];
 
     var currentPosX = startRow;
     var currentPosY = startCol;
 
+    // Minimum distance currently to Start
     var currentMinimum = 0;
-
     var visitedNodes = [];
     // add start node as visited
     visitedNodes.push(startRow + ":" + startCol)
@@ -294,33 +300,40 @@ function App() {
     // 13,15,15,16,19,21        -              1, 1, 1, 2, 2, 2 
 
     var goalreached = false;
+    
+    var testVal = 0;
 
-    
-    for (var reps = 0; reps < 100; reps++){}
-    
     while(goalreached === false){
+      testVal++;
       dataStack.shift(); // remove first value cuz we need to replace it by these following three !
-      if(visitedNodes.includes(currentPosX + ":" + (currentPosY+1))  === false && isWall(currentPosX, currentPosY+1) == false){
-         dataStack.unshift([newArray[currentPosX][currentPosY+1][1] + currentMinimum, currentPosX, currentPosY+1, '|']);
-         newArray[currentPosX][currentPosY+1][0] = 4;
-      }
-      if(visitedNodes.includes((currentPosX+1) + ":" + currentPosY)  === false && isWall(currentPosX+1, currentPosY) == false){
-        dataStack.unshift([newArray[currentPosX+1][currentPosY][1] + currentMinimum, currentPosX+1, currentPosY, '|']);
-        newArray[currentPosX+1][currentPosY][0] = 4;
-      }
-      if(visitedNodes.includes(currentPosX + ":" + (currentPosY-1) ) === false && isWall(currentPosX, currentPosY-1) == false){
-        dataStack.unshift([newArray[currentPosX][currentPosY-1][1] + currentMinimum, currentPosX, currentPosY-1, '|']);
-        newArray[currentPosX][currentPosY-1][0] = 4;
-      }
-      if(visitedNodes.includes((currentPosX-1) + ":" + currentPosY)  === false && isWall(currentPosX-1, currentPosY) == false){
-        dataStack.unshift([newArray[currentPosX-1][currentPosY][1] + currentMinimum, currentPosX-1, currentPosY, '|']);
+      
+      if(visitedNodes.includes((currentPosX-1) + ":" + currentPosY)  === false && currentPosX-1 >= 0 && isWall(currentPosX-1, currentPosY) == false ){
+        dataStack.unshift([newArray[currentPosX-1][currentPosY][1] + currentMinimum, currentPosX-1, currentPosY, currentPosX, currentPosY]);
         newArray[currentPosX-1][currentPosY][0] = 4;
+        newArray[currentPosX-1][currentPosY][1] = currentPosX;
+        newArray[currentPosX-1][currentPosY][2] = currentPosY;
       }
-
-
+      if(visitedNodes.includes(currentPosX + ":" + (currentPosY-1) ) === false && currentPosY-1 >= 0 && isWall(currentPosX, currentPosY-1) == false ){
+        dataStack.unshift([newArray[currentPosX][currentPosY-1][1] + currentMinimum, currentPosX, currentPosY-1, currentPosX, currentPosY]);
+        newArray[currentPosX][currentPosY-1][0] = 4;
+        newArray[currentPosX][currentPosY-1][1] = currentPosX;
+        newArray[currentPosX][currentPosY-1][2] = currentPosY;
+      }
+      if(visitedNodes.includes((currentPosX+1) + ":" + currentPosY)  === false && currentPosX+1 < rownumbers && isWall(currentPosX+1, currentPosY) == false ){
+        dataStack.unshift([newArray[currentPosX+1][currentPosY][1] + currentMinimum, currentPosX+1, currentPosY, currentPosX, currentPosY]);
+        newArray[currentPosX+1][currentPosY][0] = 4;
+        newArray[currentPosX+1][currentPosY][1] = currentPosX;
+        newArray[currentPosX+1][currentPosY][2] = currentPosY;
+      }
+      if(visitedNodes.includes(currentPosX + ":" + (currentPosY+1))  === false && currentPosY+1 < colnumbers && isWall(currentPosX, currentPosY+1) == false){
+         dataStack.unshift([newArray[currentPosX][currentPosY+1][1] + currentMinimum, currentPosX, currentPosY+1, currentPosX, currentPosY]);
+         newArray[currentPosX][currentPosY+1][0] = 4;
+         newArray[currentPosX][currentPosY+1][1] = currentPosX;
+         newArray[currentPosX][currentPosY+1][2] = currentPosY;
+      }
+      
       // sort dataStack by ascendig order
       dataStack = dataStack.sort(function(a,b) {return a[0]-b[0]});
-      
 
       // 0 cuz ascending order so minimum is always in 0
       var minimumPosX = dataStack[0][1];
@@ -331,18 +344,62 @@ function App() {
       // update minimum
       currentMinimum += dataStack[0][0];
 
-     // alert("" + currentPosY + ":" + currentPosY + "");
       visitedNodes.push(currentPosX + ":" + currentPosY)
 
       if(currentPosX == endRow && currentPosY == endCol){
         goalreached = true;
       }
 
+      var wait = 0;
+      await sleep((1));
+      updateGrid([...newArray]);
+      
+    }
+
+    alert(testVal)
+
+    // Tracing back from target to start the SHORTEST PATH
+    var ShortestPath = [];
+    var prevToTargetX = maingrid[endRow][endCol][1];
+    var prevToTargetY = maingrid[endRow][endCol][2];
+    ShortestPath.push([prevToTargetX , prevToTargetY])
+   // alert(prevToTargetX + ":" + prevToTargetY)
+    var startreached = false;
+
+   // alert(maingrid[prevToTargetX][prevToTargetY][2]) 
+
+   // IMPORTANT : you can remove this method if FASTER solution needed - directly apply color in this method
+    while(startreached === false){
+      if(prevToTargetX == 0 && prevToTargetY == 0){
+        startreached = true;
+        break;
+      }
+      var cur = newArray[prevToTargetX][prevToTargetY];
+      prevToTargetX = cur[1];
+      prevToTargetY = cur[2];
+
+      ShortestPath.push([prevToTargetX , prevToTargetY]);
+    }
+
+    ShortestPath.pop(); // remove last value 0,0 .
+
+    // Apply Final Path color !!!
+    for(var i = 0; i< ShortestPath.length; i++){
+      newArray[ShortestPath[i][0]][ShortestPath[i][1]][0] = 5;
     }
     
+    // Get the Final distance between Start to Target Node
+    var finalDistance = ShortestPath.length;
+
+    
     updateGrid([...newArray]);
+    
   }
 
+  function sleep(time) {
+    return new Promise(resolve => setTimeout(()=>resolve(), time));
+  }
+  
   function isWall(row,col) {
     if(maingrid[row][col][0] == 1){
         return true;
