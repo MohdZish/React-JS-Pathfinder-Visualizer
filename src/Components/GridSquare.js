@@ -1,4 +1,7 @@
+import React from "react";
 import { useState} from 'react';
+import { css } from "styled-components";
+import styled, {keyframes } from "styled-components";
 
 const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnclicked, startendpos, updateStartEnd }) => {
     
@@ -19,13 +22,15 @@ const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnc
         var value = maingrid[row][col][0]
     }
     
-    const [item, setItem] = useState(value);
+    
     //nodevalue = '1' ? maingrid[row][col] = '1' : maingrid[row][col] = '0';
 
 
     //MOST AWESOME METHOD EVER
     //Change Parent State array element without rerendering whole array again
     // so no more slow anymore !
+    const [item, setItem] = useState(value);
+    
     function onchange() {
         let newValue = 0;
         if(value === 1){
@@ -51,9 +56,8 @@ const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnc
           let newItem = newValue;
             
           // sync with [arent array]
-          updatethegrid(row, col, newItem);
+          updatethegrid(row, col, newItem, 0);
           return newItem;
-          
         });
     }
 
@@ -61,11 +65,32 @@ const GridSquare = ({row, col, maingrid, updatethegrid, StartBtnclicked, EndBtnc
 
     const startblock = <div className='btn btn-primary'></div>;
 
+    
+   let bGColor = {
+        //backgroundColor: "white",
+      };
+
+    if(value == 1){ // Wall CSS
+        bGColor = { backgroundColor: "DodgerBlue"}; // blue of bootstrap primary
+    }
+
+    if(value == 2){ // Start CSS
+        bGColor = { backgroundColor: "#19ff38", borderWidth : "20px" }; 
+    }
+
+    if(value == 3){ // Target End CSS
+        bGColor = { backgroundColor: "#f74848", borderWidth : "20px"}; 
+    }
+
     return (
-        <div className='gridsquare'   onClick={onchange} style={{ backgroundColor : value === 1 ? '#007BFF' : value === 2 ?  '#34eb6b' : value === 3 ?  '#f74848' : value === 4 ?  'yellow' : '' }}>
-         
+        <div className={"gridsquare " + (value === 4 ? "loadingAnimation " : '') + (value === 5 ? "pathfoundAnimation " : '')} onClick={onchange} style={bGColor}>
+           
         </div>
     )
+
+    // INTERESTING CSS Styling with If and Else
+    //<div className='gridsquare'   onClick={onchange} style={{ backgroundColor : value === 1 ? '#007BFF' : value === 2 ?  '#19ff38' : value === 3 ?  '#f74848' : value === 4 ?  '#f4ff59' : value === 5 ?  '#33daff' : '' }}>
+      
 }
 
 export default GridSquare
