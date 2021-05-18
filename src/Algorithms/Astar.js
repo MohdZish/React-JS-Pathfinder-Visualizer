@@ -34,6 +34,9 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
 
     var targetreached = false; // check if target is reacher
 
+    // calculating h (heuristics) from start
+    var h = getHeuristic(startRow, startCol, endRow, endCol);
+
     for (var row = 0; row < rownumbers; row++) {
       distance[row] = [];
       previousNode[row] = [];
@@ -41,17 +44,12 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
       for (var col = 0; col < colnumbers; col++) {
         distance[row][col] = Infinity; // first is Type, second: X of previous node; third : Y of previous node
         previousNode[row][col] = [-1,-1]; // first is Type, second: X of previous node; third : Y of previous node
-        if(row == startRow && col == startCol){distance[row][col] = 0;}
+        if(row == startRow && col == startCol){distance[row][col] = 0 + h;}
       }
     }
     vertexSetQ.push([0, startRow, startCol]);
 
     var numberofVisitedNodes = 0;
-    
-    // calculating h (heuristics) from start
-    var h = 
-
-
 
     while(targetreached == false){
       
@@ -70,6 +68,8 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
         break;
       }
       
+      var f = 0;
+
       // add this current node to visited
       visitedNodes.push(currentPosX + ":" + currentPosY)
       
@@ -78,7 +78,10 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
         if(alt < distance[currentPosX-1][currentPosY]){
           distance[currentPosX-1][currentPosY] = alt;
           previousNode[currentPosX-1][currentPosY] = [currentPosX, currentPosY];
-          vertexSetQ.unshift([distance[currentPosX-1][currentPosY],currentPosX-1,currentPosY])
+          
+          f = distance[currentPosX-1][currentPosY] + getHeuristic(currentPosX-1, currentPosY, endRow, endCol)
+
+          vertexSetQ.unshift([f,currentPosX-1,currentPosY])
           newArray[currentPosX-1][currentPosY][0] = 4;
           numberofVisitedNodes++;
         }
@@ -89,7 +92,10 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
         if(alt < distance[currentPosX][currentPosY-1]){
           distance[currentPosX][currentPosY-1] = alt;
           previousNode[currentPosX][currentPosY-1] = [currentPosX, currentPosY];
-          vertexSetQ.unshift([distance[currentPosX][currentPosY-1],currentPosX,currentPosY-1])
+
+          f = distance[currentPosX][currentPosY-1] + getHeuristic(currentPosX, currentPosY-1, endRow, endCol)
+
+          vertexSetQ.unshift([f,currentPosX,currentPosY-1])
           newArray[currentPosX][currentPosY-1][0] = 4;
           numberofVisitedNodes++;
         }
@@ -99,7 +105,10 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
         if(alt < distance[currentPosX+1][currentPosY]){
           distance[currentPosX+1][currentPosY] = alt;
           previousNode[currentPosX+1][currentPosY] = [currentPosX, currentPosY];
-          vertexSetQ.unshift([distance[currentPosX+1][currentPosY],currentPosX+1,currentPosY])
+
+          f = distance[currentPosX+1][currentPosY] + getHeuristic(currentPosX+1, currentPosY, endRow, endCol)
+          
+          vertexSetQ.unshift([f,currentPosX+1,currentPosY])
           newArray[currentPosX+1][currentPosY][0] = 4;
           numberofVisitedNodes++
         }
@@ -109,7 +118,10 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
         if(alt < distance[currentPosX][currentPosY+1]){
           distance[currentPosX][currentPosY+1] = alt;
           previousNode[currentPosX][currentPosY+1] = [currentPosX, currentPosY];
-          vertexSetQ.unshift([distance[currentPosX][currentPosY+1],currentPosX,currentPosY+1])
+
+          f = distance[currentPosX][currentPosY+1] + getHeuristic(currentPosX, currentPosY+1, endRow, endCol)
+
+          vertexSetQ.unshift([f,currentPosX,currentPosY+1])
           newArray[currentPosX][currentPosY+1][0] = 4;
           numberofVisitedNodes++;
         }
@@ -152,7 +164,14 @@ export async function Astar(maingrid, updateGrid, isWall, updateFinalDistance, u
       updateGrid([...newArray]);
     }
   }
-  
+
+  function getHeuristic(currentX,currentY,targetX,targetY){
+    //calculating heuristic value from one current node to target node
+    // pythagorus BUT no need square root since we'll get same results at the end
+    var heuristic =  Math.pow((targetX-currentX), 2) + Math.pow((targetY-currentY), 2)
+    return heuristic;
+  }
+
 
   function sleep(time) {
     return new Promise(resolve => setTimeout(()=>resolve(), time));
